@@ -1,7 +1,7 @@
 import re
 import time
 import logging
-from urllib.parse import quote_plus
+import urllib.parse
 
 import requests
 from bs4 import BeautifulSoup
@@ -78,44 +78,55 @@ def search_ahmia(query: str, num: int = 10) -> list[dict]:
         return []
 
     try:
-        r = requests.get(
-            "https://ahmia.fi/search/",
-            params={"q": query},
-            headers={"User-Agent": USER_AGENTS[0]},
-            timeout=15,
-        )
-        r.raise_for_status()
+        from playwright.sync_api import sync_playwright
+
+        with sync_playwright() as pw:
+            b = pw.chromium.launch(
+                headless=True,
+                args=["--no-sandbox", "--disable-setuid-sandbox"],
+            )
+            page = b.new_page()
+            page.goto("https://ahmia.fi/", timeout=30000, wait_until="networkidle")
+            page.fill("input[name=q]", query)
+            page.press("input[name=q]", "Enter")
+            page.wait_for_timeout(4000)
+            html = page.content()
+            b.close()
+
+        soup = BeautifulSoup(html, "html.parser")
+        results = []
+
+        for a in soup.select("ol.searchResults a[href*='/search/redirect']"):
+            href = a.get("href", "")
+            title = a.get_text(strip=True)
+            if not title or not href:
+                continue
+
+            import re
+            url_match = re.search(r"redirect_url=([^&]+)", href)
+            url = urllib.parse.unquote(url_match.group(1)) if url_match else href
+
+            parent = a.find_parent("li")
+            snippet = ""
+            if parent:
+                snippet_el = parent.select_one("small, .description, p")
+                if snippet_el:
+                    snippet = snippet_el.get_text(strip=True)[:300]
+
+            results.append({
+                "title": title,
+                "url": url,
+                "snippet": snippet,
+                "source": "ahmia",
+            })
+            if len(results) >= num:
+                break
+
+        return filter_results(results)
+
     except Exception as e:
         log.warning(f"ahmia search failed: {e}")
         return []
-
-    if not r.text.strip():
-        return []
-
-    soup = BeautifulSoup(r.text, "html.parser")
-    results = []
-
-    for li in soup.select("ul#results li, li.result"):
-        a = li.find("a", href=True)
-        if not a:
-            continue
-        href = a["href"]
-        if not href.startswith("http"):
-            continue
-        title = a.get_text(strip=True)
-        snippet_el = li.select_one("p, span.snippet")
-        snippet = snippet_el.get_text(strip=True) if snippet_el else ""
-
-        results.append({
-            "title": title,
-            "url": href,
-            "snippet": snippet[:300] if snippet else "",
-            "source": "ahmia",
-        })
-        if len(results) >= num:
-            break
-
-    return filter_results(results)
 
 
 def search(query: str, num: int = 10) -> dict:

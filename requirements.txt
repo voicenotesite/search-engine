@@ -1,7 +1,8 @@
 fastapi
 uvicorn
 beautifulsoup4
-requests
+requests[socks]
 python-dotenv
 pytest
 httpx
+playwright
