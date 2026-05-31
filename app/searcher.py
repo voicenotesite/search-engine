@@ -43,34 +43,32 @@ def search_duckduckgo(query: str, num: int = 10) -> list[dict]:
 
     soup = BeautifulSoup(r.text, "html.parser")
     results = []
-    table = soup.find("table")
-    if not table:
-        return []
 
-    rows = table.find_all("tr")
-    i = 0
-    while i < len(rows) and len(results) < num:
-        row = rows[i]
-        links = row.find_all("a", href=True)
-        for a in links:
-            href = a.get("href", "")
-            if not href.startswith("http"):
-                continue
-            title = a.get_text(strip=True)
-            snippet = ""
-            if i + 1 < len(rows):
-                snippet_td = rows[i + 1].find("td", class_="snippet")
-                if snippet_td:
-                    snippet = snippet_td.get_text(strip=True)[:300]
-            results.append({
-                "title": title,
-                "url": href,
-                "snippet": snippet,
-                "source": "duckduckgo",
-            })
-            if len(results) >= num:
-                break
-        i += 1
+    for a in soup.select("a.result-link"):
+        href = a.get("href", "")
+        if not href.startswith("http"):
+            continue
+        title = a.get_text(strip=True)
+        if not title:
+            continue
+
+        snippet = ""
+        parent = a.find_parent("tr")
+        if parent:
+            snippet_td = parent.find_next_sibling("tr")
+            if snippet_td:
+                s = snippet_td.select_one("td.result-snippet")
+                if s:
+                    snippet = s.get_text(strip=True)[:300]
+
+        results.append({
+            "title": title,
+            "url": href,
+            "snippet": snippet,
+            "source": "duckduckgo",
+        })
+        if len(results) >= num:
+            break
 
     return filter_results(results)
 
