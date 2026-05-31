@@ -14,166 +14,105 @@
     display: flex;
     flex-direction: column;
   }
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    width: 100%;
-  }
-  header {
-    text-align: center;
-    padding: 60px 0 40px;
-  }
+  .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; width: 100%; }
+  header { text-align: center; padding: 60px 0 40px; }
   h1 {
-    font-size: 3rem;
-    font-weight: 800;
+    font-size: 3rem; font-weight: 800;
     background: linear-gradient(135deg, #a6e3a1, #89b4fa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: -1px;
   }
-  .subtitle {
-    color: #585b70;
-    font-size: 0.9rem;
-    margin-top: 8px;
-  }
-  .search-box {
-    display: flex;
-    gap: 8px;
-    margin: 32px 0;
-  }
+  .subtitle { color: #585b70; font-size: 0.9rem; margin-top: 8px; }
+
+  .search-box { display: flex; gap: 8px; margin: 32px 0; }
   .search-box input {
-    flex: 1;
-    padding: 14px 20px;
-    background: #1a1a2e;
-    border: 1px solid #2a2a44;
-    border-radius: 12px;
-    color: #e2e2f0;
-    font-size: 1rem;
-    outline: none;
-    transition: border 0.2s;
+    flex: 1; padding: 14px 20px; background: #1a1a2e; border: 1px solid #2a2a44;
+    border-radius: 12px; color: #e2e2f0; font-size: 1rem; outline: none; transition: border 0.2s;
   }
-  .search-box input:focus {
-    border-color: #a6e3a1;
-    box-shadow: 0 0 0 3px rgba(166, 227, 161, 0.1);
-  }
+  .search-box input:focus { border-color: #a6e3a1; box-shadow: 0 0 0 3px rgba(166, 227, 161, 0.1); }
   .search-box input::placeholder { color: #585b70; }
   .search-box button {
-    padding: 14px 28px;
-    background: #a6e3a1;
-    color: #0a0a0f;
-    border: none;
-    border-radius: 12px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.2s;
+    padding: 14px 28px; background: #a6e3a1; color: #0a0a0f;
+    border: none; border-radius: 12px; font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: opacity 0.2s;
   }
   .search-box button:hover { opacity: 0.85; }
   .search-box button:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  .tags {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 32px;
-  }
-  .tag {
-    padding: 4px 12px;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-  }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 32px; }
+  .tag { padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
   .tag-clear { background: #1a1a2e; color: #89b4fa; border: 1px solid #2a2a44; }
   .tag-dark { background: #1a1a2e; color: #a6e3a1; border: 1px solid #2a2a44; }
   .tag-block { background: #1a1a2e; color: #f38ba8; border: 1px solid #2a2a44; }
 
-  .stats {
-    text-align: center;
-    color: #585b70;
-    font-size: 0.85rem;
-    margin-bottom: 24px;
+  .tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+  .tab {
+    padding: 8px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; border: 1px solid #2a2a44; background: #12121e; color: #585b70;
+    transition: all 0.2s;
   }
+  .tab:hover { border-color: #2a2a44; color: #a6adc8; }
+  .tab.active { background: #1a1a2e; color: #a6e3a1; border-color: #a6e3a1; }
 
+  .stats { text-align: center; color: #585b70; font-size: 0.85rem; margin-bottom: 24px; }
   .results { list-style: none; }
   .result {
-    padding: 16px 20px;
-    margin-bottom: 12px;
-    background: #12121e;
-    border: 1px solid #1a1a2e;
-    border-radius: 12px;
-    transition: border 0.2s;
+    padding: 16px 20px; margin-bottom: 12px; background: #12121e;
+    border: 1px solid #1a1a2e; border-radius: 12px; transition: border 0.2s;
   }
   .result:hover { border-color: #2a2a44; }
   .result .source {
-    display: inline-block;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 4px;
-    margin-bottom: 6px;
-    text-transform: uppercase;
+    display: inline-block; font-size: 0.7rem; font-weight: 700;
+    padding: 2px 8px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase;
   }
-  .source-google { background: #1e1e3a; color: #89b4fa; }
-  .source-ahmia { background: #1e2a1e; color: #a6e3a1; }
+  .source-clear { background: #1e1e3a; color: #89b4fa; }
+  .source-dark { background: #1e2a1e; color: #a6e3a1; }
   .result a {
-    color: #89b4fa;
-    text-decoration: none;
-    font-size: 1.05rem;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 4px;
+    color: #89b4fa; text-decoration: none; font-size: 1.05rem;
+    font-weight: 600; display: block; margin-bottom: 4px;
   }
   .result a:hover { text-decoration: underline; }
-  .result .url {
-    color: #585b70;
-    font-size: 0.8rem;
-    margin-bottom: 4px;
-    word-break: break-all;
-  }
-  .result .snippet {
-    color: #a6adc8;
-    font-size: 0.9rem;
-    line-height: 1.5;
-  }
+  .result .url { color: #585b70; font-size: 0.8rem; margin-bottom: 4px; word-break: break-all; }
+  .result .snippet { color: #a6adc8; font-size: 0.9rem; line-height: 1.5; }
 
-  .blocked-msg {
-    text-align: center;
-    padding: 40px;
-    color: #f38ba8;
-  }
+  .blocked-msg { text-align: center; padding: 40px; color: #f38ba8; }
   .blocked-msg h2 { font-size: 1.2rem; margin-bottom: 8px; }
   .blocked-msg p { color: #585b70; font-size: 0.9rem; }
 
-  .spinner {
-    text-align: center;
-    padding: 60px 0;
-  }
+  .spinner { text-align: center; padding: 60px 0; }
   .spinner::after {
-    content: '';
-    display: inline-block;
-    width: 32px; height: 32px;
-    border: 3px solid #2a2a44;
-    border-top-color: #a6e3a1;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    content: ''; display: inline-block; width: 32px; height: 32px;
+    border: 3px solid #2a2a44; border-top-color: #a6e3a1;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { text-align: center; color: #585b70; padding: 60px 0; }
 
-  .empty {
-    text-align: center;
-    color: #585b70;
-    padding: 60px 0;
+  .tor-modal {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;
   }
+  .tor-modal.show { display: flex; }
+  .tor-modal-box {
+    background: #12121e; border: 1px solid #2a2a44; border-radius: 16px;
+    padding: 40px; max-width: 480px; width: 90%; text-align: center;
+  }
+  .tor-modal-box h2 { color: #a6e3a1; margin-bottom: 12px; }
+  .tor-modal-box p { color: #a6adc8; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.6; }
+  .tor-btn {
+    display: inline-block; padding: 12px 24px; border-radius: 10px;
+    font-weight: 700; text-decoration: none; margin: 4px; font-size: 0.9rem;
+  }
+  .tor-btn-ios { background: #89b4fa; color: #0a0a0f; }
+  .tor-btn-android { background: #a6e3a1; color: #0a0a0f; }
+  .tor-btn-close {
+    display: inline-block; margin-top: 16px; color: #585b70;
+    cursor: pointer; font-size: 0.85rem; text-decoration: underline;
+  }
+  .tor-btn-close:hover { color: #a6adc8; }
 
-  footer {
-    text-align: center;
-    padding: 40px;
-    color: #585b70;
-    font-size: 0.8rem;
-    margin-top: auto;
-  }
+  footer { text-align: center; padding: 40px; color: #585b70; font-size: 0.8rem; margin-top: auto; }
   footer a { color: #585b70; }
 
   @media (max-width: 600px) {
@@ -187,7 +126,7 @@
 <div class="container">
   <header>
     <h1>DarkSearch</h1>
-    <p class="subtitle">Clearnet (DuckDuckGo) + Darknet (Ahmia .onion) · z filtrem bezpieczeństwa</p>
+    <p class="subtitle">Clearnet + Darknet (.onion) · z filtrem bezpieczeństwa</p>
   </header>
 
   <div class="search-box">
@@ -201,8 +140,34 @@
     <span class="tag tag-block">&#x26D4; Filtr NCII</span>
   </div>
 
+  <div class="tabs">
+    <div class="tab active" data-tab="all" onclick="switchTab('all')">&#x1F50D; Wszystkie</div>
+    <div class="tab" data-tab="clear" onclick="switchTab('clear')">&#x2601; Clearnet</div>
+    <div class="tab" data-tab="dark" onclick="switchTab('dark')">&#x1F4E1; Darknet</div>
+  </div>
+
   <div id="stats" class="stats"></div>
   <div id="results"></div>
+</div>
+
+<div class="tor-modal" id="torModal">
+  <div class="tor-modal-box">
+    <h2>&#x1F4E1; Wymagany Tor Browser</h2>
+    <p>
+      Strony .onion są dostępne tylko przez sieć Tor.<br>
+      Zainstaluj Tor Browser, aby otworzyć ten link.
+    </p>
+    <a class="tor-btn tor-btn-ios" href="https://www.torproject.org/download/#ios" target="_blank">
+      &#x1F4F1; Tor na iOS
+    </a>
+    <a class="tor-btn tor-btn-android" href="https://www.torproject.org/download/#android" target="_blank">
+      &#x1F4F1; Tor na Android
+    </a>
+    <a class="tor-btn tor-btn-ios" href="https://www.torproject.org/download/" target="_blank" style="background:#2a2a44;">
+      &#x1F5A5; Tor na Desktop
+    </a>
+    <div class="tor-btn-close" onclick="closeTorModal()">Zamknij</div>
+  </div>
 </div>
 
 <footer>
@@ -214,9 +179,18 @@ const input = document.getElementById('query');
 const btn = document.getElementById('searchBtn');
 const resultsDiv = document.getElementById('results');
 const statsDiv = document.getElementById('stats');
+let allData = null;
+let currentTab = 'all';
 
 input.addEventListener('keydown', e => { if (e.key === 'Enter') search(); });
 btn.addEventListener('click', search);
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+  if (allData) renderResults(allData);
+}
 
 async function search() {
   const q = input.value.trim();
@@ -235,8 +209,8 @@ async function search() {
     }
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
 
-    const data = await r.json();
-    renderResults(data);
+    allData = await r.json();
+    renderResults(allData);
   } catch (e) {
     resultsDiv.innerHTML = `<div class="empty">Błąd: ${e.message}</div>`;
   } finally {
@@ -251,22 +225,42 @@ function renderResults(data) {
     return;
   }
 
+  let filtered = data.results;
+  if (currentTab === 'clear') filtered = data.results.filter(r => r.source !== 'ahmia');
+  if (currentTab === 'dark') filtered = data.results.filter(r => r.source === 'ahmia');
+
   statsDiv.textContent = `Znaleziono ${data.total} wyników (DuckDuckGo: ${data.sources.duckduckgo || 0}, Ahmia: ${data.sources.ahmia || 0})`;
 
+  if (filtered.length === 0) {
+    resultsDiv.innerHTML = '<div class="empty">Brak wyników w tej kategorii</div>';
+    return;
+  }
+
   let html = '<ul class="results">';
-  for (const r of data.results) {
-    const sourceClass = r.source === 'ahmia' ? 'source-ahmia' : 'source-google';
-    const sourceLabel = r.source === 'ahmia' ? 'Ahmia (.onion)' : r.source === 'duckduckgo' ? 'DuckDuckGo' : r.source;
+  for (const r of filtered) {
+    const isDark = r.source === 'ahmia';
+    const sourceClass = isDark ? 'source-dark' : 'source-clear';
+    const sourceLabel = isDark ? 'Ahmia (.onion)' : 'DuckDuckGo';
+    const onclick = isDark ? ` onclick="handleOnionClick(event, '${escapeHtml(r.url)}')"` : '';
     html += `
       <li class="result">
         <span class="source ${sourceClass}">${sourceLabel}</span>
-        <a href="${r.url}" target="_blank" rel="noopener">${escapeHtml(r.title)}</a>
+        <a href="${r.url}" target="_blank" rel="noopener"${onclick}>${escapeHtml(r.title)}</a>
         <div class="url">${escapeHtml(r.url)}</div>
         ${r.snippet ? `<div class="snippet">${escapeHtml(r.snippet)}</div>` : ''}
       </li>`;
   }
   html += '</ul>';
   resultsDiv.innerHTML = html;
+}
+
+function handleOnionClick(event, url) {
+  event.preventDefault();
+  document.getElementById('torModal').classList.add('show');
+}
+
+function closeTorModal() {
+  document.getElementById('torModal').classList.remove('show');
 }
 
 function escapeHtml(s) {
