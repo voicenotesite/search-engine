@@ -24,49 +24,53 @@ def _headers() -> dict:
     }
 
 
-def search_google(query: str, num: int = 10) -> list[dict]:
+def search_duckduckgo(query: str, num: int = 10) -> list[dict]:
     if is_blocked(query):
         return []
 
-    params = {"q": query, "num": min(num, 20), "hl": "en"}
+    data = {"q": query, "kl": "us-en"}
     try:
-        r = requests.get(
-            "https://www.google.com/search",
-            params=params,
+        r = requests.post(
+            "https://lite.duckduckgo.com/lite/",
+            data=data,
             headers=_headers(),
             timeout=10,
         )
         r.raise_for_status()
     except Exception as e:
-        log.warning(f"google search failed: {e}")
+        log.warning(f"duckduckgo search failed: {e}")
         return []
 
     soup = BeautifulSoup(r.text, "html.parser")
     results = []
+    table = soup.find("table")
+    if not table:
+        return []
 
-    for g in soup.select("div.g, div[data-hveid]"):
-        a = g.find("a", href=True)
-        if not a:
-            continue
-        href = a["href"]
-        if not href.startswith("http"):
-            continue
-
-        title_el = g.select_one("h3")
-        title = title_el.get_text(strip=True) if title_el else ""
-
-        snippet_el = g.select_one("div[data-sncf], span.aCOpRe, div.VwiC3b")
-        snippet = snippet_el.get_text(strip=True) if snippet_el else ""
-
-        results.append({
-            "title": title,
-            "url": href,
-            "snippet": snippet[:300] if snippet else "",
-            "source": "google",
-        })
-
-        if len(results) >= num:
-            break
+    rows = table.find_all("tr")
+    i = 0
+    while i < len(rows) and len(results) < num:
+        row = rows[i]
+        links = row.find_all("a", href=True)
+        for a in links:
+            href = a.get("href", "")
+            if not href.startswith("http"):
+                continue
+            title = a.get_text(strip=True)
+            snippet = ""
+            if i + 1 < len(rows):
+                snippet_td = rows[i + 1].find("td", class_="snippet")
+                if snippet_td:
+                    snippet = snippet_td.get_text(strip=True)[:300]
+            results.append({
+                "title": title,
+                "url": href,
+                "snippet": snippet,
+                "source": "duckduckgo",
+            })
+            if len(results) >= num:
+                break
+        i += 1
 
     return filter_results(results)
 
@@ -87,6 +91,9 @@ def search_ahmia(query: str, num: int = 10) -> list[dict]:
         log.warning(f"ahmia search failed: {e}")
         return []
 
+    if not r.text.strip():
+        return []
+
     soup = BeautifulSoup(r.text, "html.parser")
     results = []
 
@@ -97,9 +104,7 @@ def search_ahmia(query: str, num: int = 10) -> list[dict]:
         href = a["href"]
         if not href.startswith("http"):
             continue
-
         title = a.get_text(strip=True)
-
         snippet_el = li.select_one("p, span.snippet")
         snippet = snippet_el.get_text(strip=True) if snippet_el else ""
 
@@ -109,7 +114,6 @@ def search_ahmia(query: str, num: int = 10) -> list[dict]:
             "snippet": snippet[:300] if snippet else "",
             "source": "ahmia",
         })
-
         if len(results) >= num:
             break
 
@@ -117,15 +121,15 @@ def search_ahmia(query: str, num: int = 10) -> list[dict]:
 
 
 def search(query: str, num: int = 10) -> dict:
-    google_results = search_google(query, num)
+    ddg_results = search_duckduckgo(query, num)
     dark_results = search_ahmia(query, num)
 
     return {
         "query": query,
-        "total": len(google_results) + len(dark_results),
-        "results": google_results + dark_results,
+        "total": len(ddg_results) + len(dark_results),
+        "results": ddg_results + dark_results,
         "sources": {
-            "google": len(google_results),
+            "duckduckgo": len(ddg_results),
             "ahmia": len(dark_results),
         },
     }
