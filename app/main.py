@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
-from .searcher import search, search_duckduckgo
+from .searcher import search
 from .filter import is_blocked
 
 load_dotenv()
@@ -38,20 +38,6 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
-
-@app.get("/debug/ddg")
-def debug_ddg(q: str = "python"):
-    import requests
-    from bs4 import BeautifulSoup
-    try:
-        r = requests.post("https://lite.duckduckgo.com/lite/", data={"q": q, "kl": "us-en"},
-            headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
-        soup = BeautifulSoup(r.text, "html.parser")
-        links = [a.get("href") for a in soup.select("a.result-link")]
-        return {"status": r.status_code, "len": len(r.text), "links": links[:5], "has_table": bool(soup.find("table"))}
-    except Exception as e:
-        return {"error": str(e)}
 
 
 @app.get("/api/search")
