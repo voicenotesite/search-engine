@@ -187,7 +187,7 @@
 <div class="container">
   <header>
     <h1>DarkSearch</h1>
-    <p class="subtitle">Clearnet + Darknet · z filtrem bezpieczeństwa</p>
+    <p class="subtitle">Clearnet (DuckDuckGo) + Darknet (Ahmia .onion) · z filtrem bezpieczeństwa</p>
   </header>
 
   <div class="search-box">
@@ -197,7 +197,7 @@
 
   <div class="tags">
     <span class="tag tag-clear">&#x2601; DuckDuckGo</span>
-    <span class="tag tag-dark">&#x1F4E1; Ahmia (.onion)</span>
+    <span class="tag tag-dark">&#x1F4E1; Ahmia (darknet .onion)</span>
     <span class="tag tag-block">&#x26D4; Filtr NCII</span>
   </div>
 
@@ -256,7 +256,7 @@ function renderResults(data) {
   let html = '<ul class="results">';
   for (const r of data.results) {
     const sourceClass = r.source === 'ahmia' ? 'source-ahmia' : 'source-google';
-    const sourceLabel = r.source === 'ahmia' ? 'Ahmia' : r.source === 'duckduckgo' ? 'DuckDuckGo' : r.source;
+    const sourceLabel = r.source === 'ahmia' ? 'Ahmia (.onion)' : r.source === 'duckduckgo' ? 'DuckDuckGo' : r.source;
     html += `
       <li class="result">
         <span class="source ${sourceClass}">${sourceLabel}</span>
