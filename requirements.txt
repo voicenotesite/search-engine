@@ -1,1 +1,10 @@
-fastapi\nuvicorn\nbeautifulsoup4\nrequests[socks]\npython-dotenv\npytest\nhttpx\nplaywright\nslowapi\npython-json-logger
+fastapi
+uvicorn
+beautifulsoup4
+requests[socks]
+python-dotenv
+pytest
+httpx
+playwright
+slowapi
+python-json-logger
