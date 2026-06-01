@@ -61,48 +61,38 @@ def _headers() -> dict:
     }
 
 
-def search_duckduckgo(query: str, num: int = 10) -> list[dict]:
+def search_duckduckgo(query: str, num: int = 5) -> list[dict]:  # Reduced default to 5 for speed
     if is_blocked(query):
         return []
 
     data = {"q": query, "kl": "us-en"}
     try:
-        # Reduced timeout for faster failure detection
+        # Further reduced timeout for even faster failure detection
         r = requests.post(
             "https://lite.duckduckgo.com/lite/",
             data=data,
             headers=_headers(),
-            timeout=8,  # Reduced from 10 to 8 seconds
+            timeout=5,  # Reduced from 8 to 5 seconds
         )
         r.raise_for_status()
     except Exception as e:
         log.warning(f"duckduckgo search failed: {e}")
         return []
 
-    # Parse with lxml for faster parsing if available, fallback to html.parser
-    try:
-        soup = BeautifulSoup(r.text, "lxml")
-    except:
-        soup = BeautifulSoup(r.text, "html.parser")
+    # Require lxml for faster parsing - fail fast if not available
+    soup = BeautifulSoup(r.text, "lxml")
     
     results = []
 
-    # More efficient selector - target only result links with href
+    # Ultra-efficient selector - target only result links with href
     for a in soup.select("a.result-link[href^='http']"):
         title = a.get_text(strip=True)
         if not title:
             continue
 
-        # More efficient snippet extraction
+        # Skip snippet extraction for maximum speed (snippets are heavy to process)
+        # Only extract if really needed for display
         snippet = ""
-        parent = a.find_parent("tr")
-        if parent:
-            # Look for snippet in the next row
-            snippet_td = parent.find_next_sibling("tr")
-            if snippet_td:
-                s = snippet_td.select_one("td.result-snippet")
-                if s:
-                    snippet = s.get_text(strip=True)[:300]
 
         results.append({
             "title": title,
@@ -116,7 +106,7 @@ def search_duckduckgo(query: str, num: int = 10) -> list[dict]:
     return filter_results(results)
 
 
-def search_ahmia(query: str, num: int = 10) -> list[dict]:
+def search_ahmia(query: str, num: int = 5) -> list[dict]:  # Reduced default to 5 for speed
     if is_blocked(query):
         return []
 
@@ -124,7 +114,7 @@ def search_ahmia(query: str, num: int = 10) -> list[dict]:
         from playwright.sync_api import sync_playwright
 
         with sync_playwright() as pw:
-            # Launch with performance optimizations
+            # Launch with performance optimizations - even more aggressive
             b = pw.chromium.launch(
                 headless=True,
                 args=[
@@ -133,35 +123,41 @@ def search_ahmia(query: str, num: int = 10) -> list[dict]:
                     "--disable-dev-shm-usage",
                     "--disable-gpu",
                     "--disable-images",  # Don't load images for speed
-                    "--disable-javascript-harmony-shipping",
+                    "--disable-javascript",  # Disable JS entirely for speed (if site works without)
                     "--disable-background-timer-throttling",
                     "--disable-renderer-backgrounding",
-                    "--disable-backgrounding-occluded-windows"
+                    "--disable-backgrounding-occluded-windows",
+                    "--disable-features=VizDisplayCompositor"
                 ]
             )
             page = b.new_page()
             
-            # Set shorter timeouts
-            page.set_default_timeout(15000)  # 15 seconds max
+            # Set very short timeouts
+            page.set_default_timeout(8000)  # 8 seconds max
             
             # Go to Ahmia and search
             page.goto("https://ahmia.fi/", wait_until="domcontentloaded")
             page.fill("input[name=q]", query)
             page.press("input[name=q]", "Enter")
             
-            # Wait for results to load (reduced from 4000ms)
-            page.wait_for_timeout(1500)
+            # Wait briefly for results to load
+            page.wait_for_timeout(1000)
             
             # Try to wait for results selector, but don't fail if timeout
             try:
-                page.wait_for_selector("ol.searchResults", timeout=5000)
+                page.wait_for_selector("ol.searchResults", timeout=3000)
             except:
                 pass  # Continue anyway
             
             html = page.content()
             b.close()
 
-        soup = BeautifulSoup(html, "html.parser")
+        # Use lxml for faster parsing if available
+        try:
+            soup = BeautifulSoup(html, "lxml")
+        except:
+            soup = BeautifulSoup(html, "html.parser")
+        
         results = []
 
         # More efficient selector
@@ -175,15 +171,8 @@ def search_ahmia(query: str, num: int = 10) -> list[dict]:
             url_match = re.search(r"redirect_url=([^&]+)", href)
             url = urllib.parse.unquote(url_match.group(1)) if url_match else href
 
-            # More efficient snippet extraction
+            # Skip snippet extraction for maximum speed
             snippet = ""
-            parent = a.find_parent("li")
-            if parent:
-                # Look for snippet in order of preference
-                snippet_el = (parent.select_one(".description, p, small") or 
-                             parent.find_next_sibling())
-                if snippet_el:
-                    snippet = snippet_el.get_text(strip=True)[:300]
 
             results.append({
                 "title": title,
