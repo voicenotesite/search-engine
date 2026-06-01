@@ -2,6 +2,9 @@ import re
 import time
 import logging
 import urllib.parse
+from functools import lru_cache
+from threading import Lock
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import requests
 from bs4 import BeautifulSoup
@@ -10,11 +13,45 @@ from .filter import filter_results, is_blocked
 
 log = logging.getLogger("searcher")
 
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/119.0.0.0 Safari/537.36",
-]
+# Simple in-memory cache for search results
+_search_cache = {}
+_cache_lock = Lock()
+CACHE_TTL = 300  # 5 minutes cache TTL
+MAX_CACHE_SIZE = 100  # Maximum number of cached entries
+
+# Thread pool for parallel execution
+_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="search")
+
+
+def _get_cache_key(query: str, num: int, sort: str, range: str) -> str:
+    """Generate a cache key for search parameters."""
+    return f"{query}:{num}:{sort}:{range}"
+
+
+def _get_from_cache(key: str):
+    """Get item from cache if it exists and is not expired."""
+    with _cache_lock:
+        if key in _search_cache:
+            timestamp, data = _search_cache[key]
+            if time.time() - timestamp < CACHE_TTL:
+                return data
+            else:
+                # Remove expired entry
+                del _search_cache[key]
+    return None
+
+
+def _save_to_cache(key: str, data):
+    """Save item to cache, implementing LRU eviction if needed."""
+    with _cache_lock:
+        # If cache is too large, remove oldest entries
+        if len(_search_cache) >= MAX_CACHE_SIZE:
+            # Remove 20% of oldest entries
+            sorted_items = sorted(_search_cache.items(), key=lambda x: x[1][0])
+            for k, _ in sorted_items[:MAX_CACHE_SIZE // 5]:
+                del _search_cache[k]
+        
+        _search_cache[key] = (time.time(), data)
 
 
 def _headers() -> dict:
@@ -165,8 +202,22 @@ def search_ahmia(query: str, num: int = 10) -> list[dict]:
 
 
 def search(query: str, num: int = 10, sort: str = "relevance", range: str = "any") -> dict:
-    ddg_results = search_duckduckgo(query, num)
-    dark_results = search_ahmia(query, num)
+    # Check cache first
+    cache_key = _get_cache_key(query, num, sort, range)
+    cached_result = _get_from_cache(cache_key)
+    if cached_result is not None:
+        log.info(f"Returning cached result for query: {query}")
+        return cached_result
+    
+    # Perform searches in parallel
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        # Submit both search tasks
+        ddg_future = executor.submit(search_duckduckgo, query, num)
+        dark_future = executor.submit(search_ahmia, query, num)
+        
+        # Get results as they complete
+        ddg_results = ddg_future.result()
+        dark_results = dark_future.result()
 
     # Combine results
     all_results = ddg_results + dark_results
@@ -184,7 +235,7 @@ def search(query: str, num: int = 10, sort: str = "relevance", range: str = "any
     # For simplicity, we'll note that this would need to be implemented in the individual search functions
     # based on the dateRange parameter
 
-    return {
+    result = {
         "query": query,
         "total": len(all_results),
         "results": all_results,
@@ -193,3 +244,8 @@ def search(query: str, num: int = 10, sort: str = "relevance", range: str = "any
             "ahmia": len(dark_results),
         },
     }
+    
+    # Save to cache
+    _save_to_cache(cache_key, result)
+    
+    return result

@@ -12,8 +12,8 @@ BLOCKED_CATEGORIES = [
     r"revenge\s*porn",
     r"non-consensual\s*porn",
     # Weapons trade (block buying/selling, allow informational)
-    r"\b(buy|sell|purchase|order|trade)\s*(weapon|gun|firearm|ammunition|ammo|explosive|bomb)\b",
-    r"\b(weapon|gun|firearm|ammunition|ammo|explosive|bomb)\s*(for\s*sale|to\s*buy|to\s*sell)\b",
+    r"\b(buy|sell|purchase|order|trade)\s*(weapon|firearm|ammunition|ammo|explosive|bomb)\b",
+    r"\b(weapon|firearm|ammunition|ammo|explosive|bomb)\s*(for\s*sale|to\s*buy|to\s*sell)\b",
     # Hitman and illegal services
     r"hitman",
     r"assassination",
